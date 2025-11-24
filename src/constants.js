@@ -1,0 +1,1 @@
+export const DB_NAME = "youtube" // it is not a system specific variable therefore i did not keep it in .env
