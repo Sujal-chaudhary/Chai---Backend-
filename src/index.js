@@ -8,10 +8,18 @@ import dotenv from 'dotenv'
 
 dotenv.config({path: './env'})
 
-
- 
 connectDB()
 
+// every async process after completion return a promise
+.then(() => {
+  app.listen(process.env.PORT || 8000,() => {
+    console.log(`server is running at ${process.env.PORT}`);
+  }) // now our server will with start listening.
+})
+.catch((error) => {
+  console.log("mongoDB connection failed !!!",error);
+  
+});
 
 
 
@@ -51,7 +59,7 @@ const app = express()
 We use async–await here because:-
 
 Mongoose.connect() is asynchronous
-
+ 
 We must wait for DB to connect before starting server
 
 We must catch errors properly
