@@ -50,7 +50,9 @@ Generate tokens
 Basically ALL business logic lives in controllers.
 
 
+=> for file upload in backend we will use multer(mostly used these days) with the help of this we will upload the file (ye ek sdk hi hai) just like aws sdk
 
+steps:- user se file upload karwayenge with the help of multer => then us file ko temporary apne server pe rkhenge => then apne local storage se utha ke clodinary ke servers pe rakh denge
 
 
 
