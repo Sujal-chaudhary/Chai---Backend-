@@ -2,7 +2,7 @@
 
 import express from 'express'
 import cors from 'cors'
-import cookieParser from 'cookie-parser'
+import cookieParser from "cookie-parser"
 
 const app = express()
 
@@ -34,6 +34,24 @@ app.use(express.static("public"))/* kabhi kabar koi files,image aayi to main use
 
 
 app.use(cookieParser()) // browser se jo bhi cookies aaye server use read kr ske and unpe CRUD operation perform kar sake.
+
+
+//routes import:
+import userRouter from "./routes/user.routes.js"
+
+
+
+
+//routes decleration:-
+
+/*as pehle hum app.get directly use yha krte the beacuse hum route bhi yahi likh rhe the aur controller bhi but now they are seprated there we will use app.use() here */
+
+app.use("/api/v1/users", userRouter) // when any user type "/users"the control will come in hand of userRouter then ye userRouter.js me jayenge aur puchega kya krna hai.
+
+// http://localhost:8000/api/v1/users/register
+
+
+ 
 
 
 
