@@ -33,7 +33,7 @@ import fs from "fs" // filesystem liabrary of nodejs used while managing any fil
     }
 
 
-    export default uploadOnCloudinary;
+    export  {uploadOnCloudinary};
 
 
 
