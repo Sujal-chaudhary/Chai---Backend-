@@ -25,7 +25,8 @@ const registerUser = asyncHandler(
 
        // step 1:(Data Extraction)
        const {fullname, email, username, password} = req.body //Extract kr rhe hai text data
-       console.log("email: ", email);
+       console.log("body: ", req.body);
+
        
        //step 2:(validation)
        if(
@@ -34,8 +35,8 @@ const registerUser = asyncHandler(
         throw new ApiError(400,"All fields are required")
        }
 
-       // step 3:(checking if user exist or not)
-       const existedUser = User.findOne({
+       // step 3:(checking if user already exist or not)
+       const existedUser = await User.findOne({
        $or: [{username},{email}]
       })
 
@@ -44,19 +45,30 @@ const registerUser = asyncHandler(
       } 
 
       //step 4: handling file
-      const avatarLocalPath = req.files?.avatar[0]?.path;
-      const coverImageLocalPath = req.files?.coverImage[0]?.path;
+      const avatarLocalPath = req.files?.avatar[0]?.path
+      // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+     
+      let coverImageLocalPath;
+      if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length>0){
+        coverImageLocalPath = req.files.coverImage[0].path
+      } // now we will not get undefined error.
+      
 
        if(!avatarLocalPath){
         throw new ApiError(400, "upload an avatar")
        }
+       
+       // checks if multer is saving our data on server:
+        console.log("FILES:", req.files);
+      // console.log("AVATAR PATH:", avatarLocalPath);
+  
 
        //step 5:(uploading files on cloudinary)
         const avatar = await uploadOnCloudinary(avatarLocalPath) //timetaking
         const coverImage = await uploadOnCloudinary(coverImageLocalPath) //timetaking
 
         if(!avatar){
-            throw new ApiError(400.,"please upload an avatar")
+            throw new ApiError(400,"please upload an avatar")
         }
 
         //step 6:(making a user object and make entry in DB)
@@ -66,7 +78,7 @@ const registerUser = asyncHandler(
             coverImage: coverImage?.url || "",
             email,
             password,
-            username: username.tolowercase()
+            username: username.toLowerCase()
         })
          
         //step 7:(check for user creation + removing password and referesh token fields from response)

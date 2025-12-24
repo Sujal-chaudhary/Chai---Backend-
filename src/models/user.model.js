@@ -51,14 +51,26 @@ const userSchema = new Schema (
 
 
 // using async bcz Password encryption is time taking process
-userSchema.pre("save", async function (next) {
-     if(!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+     if(!this.isModified("password")) return;
 
      this.password = await bcrypt.hash(this.password, 10)
-     next()
+     
 })
 /*note:- if there will be change in this users field then har bar ye password save krega 
-         therefore i want ki jab bhi changes password field me ho tabhi ye part run ho and password save ho hamara. */
+         therefore i want ki jab bhi changes password field me ho tabhi ye part run ho and password save ho hamara. 
+         
+         bcrypt.hash(plainTextPassword, saltRounds)
+
+         plainTextPassword → "mypassword123"
+
+      10 → salt rounds (security vs speed balance)
+
+     More rounds = more secure but slower
+     10 is industry standard 👍
+         
+         
+         */
          
 
    //How to create custom methods in mongoose?

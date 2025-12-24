@@ -13,6 +13,11 @@ import fs from "fs" // filesystem liabrary of nodejs used while managing any fil
         api_secret: process.env.CLOUDINARY_API_SECRET 
     });
 
+     console.log("CLOUDINARY NAME:", process.env.CLOUDINARY_CLOUD_NAME);
+    console.log("CLOUDINARY KEY:", process.env.CLOUDINARY_API_KEY);
+    console.log("CLOUDINARY SECRET:", process.env.CLOUDINARY_API_SECRET);
+
+
 
     const uploadOnCloudinary = async(localFilePath) => {
         try {
@@ -20,10 +25,15 @@ import fs from "fs" // filesystem liabrary of nodejs used while managing any fil
             // upload the file on cloudinary:
              const response = await cloudinary.uploader.upload(localFilePath,{
                 resource_type:"auto"
-             })
+             });
              //file has been uploaded succesfully
-             console.log("file is uploaded on cloudinary",response.url); // this url is kept in our DB
-             return response;
+             // console.log("file is uploaded on cloudinary",response.url); // this url is kept in our DB
+              fs.unlinkSync(localFilePath) // removes local temp file
+              return response;
+
+              console.log(response);
+              
+
 
              
             } catch (error) {
