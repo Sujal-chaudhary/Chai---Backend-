@@ -5,7 +5,30 @@ import {ApiError} from "../utils/ApiError.js";
 import { User } from "../models/user.model.js" // this user will talk to DB on our behalf.
 import  {uploadOnCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { log } from "console";
+import jwt from "jsonwebtoken"
 
+//just a method:
+const generateAcccessAndRefreshTokens = async(userId) => {
+  try {
+   const user = await User.findById(userId)
+   const accessToken =  user.generateAccessToken()
+   const refreshToken  = user.generateRefreshToken()
+
+   user.refreshToken = refreshToken
+   await user.save({validateBeforeSave: false}) // kuch validate na kro mere is field ko bas save kr do isse baki fields affect ni hongi
+
+   return {accessToken, refreshToken};
+    
+  } catch (error) {
+    throw new ApiError(500,"something went wrong")
+  }
+}
+
+
+
+
+//Controllers:
 
 const registerUser = asyncHandler(
     async(req,res) => {
@@ -13,22 +36,31 @@ const registerUser = asyncHandler(
        // get user details from frontend (take help of postman) --> Extract kara rhe data
        // validation (checkings) - not empty
        // check if user already exists (username or email)
-       // check for image, check for avatar
+       // check for image, check for avatar (as it is compuslory)
        // then upload them to cloudinary(then again check kar lo avatar gya hai ya nhi)
-       // create user object - create entry in DB
-       // now response me jo humne data create kiya wo as it is mil jata hai therefore remove password and refresh token field from response.
+       // create user object(as it is nosql to objects hi banye jate and store karate) - create entry in DB
+       // now response me, jo humne data create kiya wo as it is mil jata hai therefore remove password and refresh token field from response.
        // check for user creation
        // in the end return response (if user is registered properly) else throw error.
 
 
-       // note: agar data forms/json se aa rha hai to wo req.body me aata hai (url ka scene thod alag hai)
+       // note: agar data forms/json se aa rha hai to wo direct req.body me aata hai but (url ka scene thod alag hai)
 
        // step 1:(Data Extraction)
        const {fullname, email, username, password} = req.body //Extract kr rhe hai text data
        console.log("body: ", req.body);
+       
+       
+       
 
        
        //step 2:(validation)
+
+       /*if(fullname === "" || email === "" || username ==="" || password ===""){
+        throw new ApiError(400,"All fields are required")
+      }*/
+        
+      // Better way:- we used .some() instead of .map() bcz that returns boolean but map returns an array
        if(
         [fullname, email, username, password].some((field) => field?.trim() === "")
        ){
@@ -42,9 +74,9 @@ const registerUser = asyncHandler(
 
       if(existedUser) {
         throw new ApiError(409,"user with email or username already exist")
-      } 
+      }  
 
-      //step 4: handling file
+      //step 4: Handling file
       const avatarLocalPath = req.files?.avatar[0]?.path
       // const coverImageLocalPath = req.files?.coverImage[0]?.path;
      
@@ -98,7 +130,162 @@ const registerUser = asyncHandler(
     } 
 )
 
-export {registerUser};
+
+const loginUser = asyncHandler(
+  async(req,res) =>{
+     /* Steps */
+   //Fetch user data from req.body
+   //username or email
+   //find the user
+   //check password
+   // access and refresh token generate karwa do
+   //send these tokens in form of cookies(secure)
+
+   const {email, username, password} = req.body
+  
+
+   //validation
+   if(!(username || email)) {
+    throw new ApiError(400,"username or password is required")
+   }
+
+   //check weather user exist or not:
+   const user = await User.findOne({
+     $or: [{username}, {email}]
+  })
+   
+  if(!user){
+    throw new ApiError(400,"username or email is not found")
+  }
+
+  //is password correct:
+ const isPasswordValid = await user.isPasswordCorrect(password)
+
+ if(!isPasswordValid){
+    throw new ApiError(401,"password incorrect")
+  }
+
+  //if password is correct then generate access and refersh token in thhe form of cookies:
+  
+ const {accessToken, refreshToken} = await generateAcccessAndRefreshTokens(user._id)
+
+ //send response to loggedinuser
+
+ const loggedInUser = await User.findById(user._id). // i get my user object it is searching by id field
+ select("-password -refreshToken")
+
+
+
+ //now we will send cookies:
+
+ const options = {
+  httpOnly: true, 
+  secure: true
+  //if both the fields are true then it is modified at the server level not on frontend
+   }
+
+ return res
+ .status(200)
+ .cookie("accessToken",accessToken, options)
+ .cookie("refreshToken",refreshToken, options)
+ .json(
+  new ApiResponse(
+    200,
+    {
+      user: loggedInUser, accessToken, refreshToken
+      //we have send this again in case user want to save this in his locale storage
+    },
+    "User Logged In Successfully"
+
+  )
+ )
+ 
+})
+
+
+const logoutUser = asyncHandler(
+  async(req,res) => {
+     // first we will bring the user as we wrote the MW so now i can access user from my req.
+
+     await User.findByIdAndUpdate(
+      req.user._id,{
+
+        $set: {
+          refreshToken: undefined
+              }
+      },
+
+      {
+        new: true
+      }
+    )
+
+    const options = {
+   httpOnly: true, 
+   secure: true
+  }
+
+  return res
+  .status(200)
+  .clearCookie("accessToken",options)
+  .clearCookie("refreshToken",options)
+  .json(new ApiResponse(200,{},"user logged out"))
+    
+
+
+} )
+
+
+const refreshAccessToken = asyncHandler(async(req,res)=> {
+      //refreshToken le aayo from cookies:-
+        const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+        if(!incomingRefreshToken){
+          throw new ApiError(401,"Unautorised request")
+          }
+      // then validate kara dunga refresh tokens ko and decode it 
+      try {
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+  
+        //user ko le aunaga
+        const user = await User.findById(decodedToken?._id)
+        if(!user){
+          throw new ApiError(401,"invalid refresh token")
+        }
+        
+        //if matches then i will generate new refresh adn access token for the user
+        if(incomingRefreshToken !== user?.refreshToken){
+          throw new ApiError(401,"refresh token is expired or used")
+        }
+  
+         const {accessToken, newrefreshToken} = await user.generateAcccessAndRefreshTokens(user._id)
+  
+        const options = {
+           httpOnly: true, 
+           secure: true
+        }
+        
+        return res
+        .status (200)
+        .cookie("accessToken",accessToken)
+        .cookie("refreshToken",newrefreshToken)
+        .json(new ApiResponse(
+           200,
+           {accessToken, refreshToken: newrefreshToken},
+           "Access token refreshed"
+        ))
+  
+      } catch (error) {
+        throw new ApiError(401,"invalid refresh token")
+      }
+})
+
+
+
+
+
+
+
+export {registerUser,loginUser,logoutUser,refreshAccessToken};
 
 
 

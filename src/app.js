@@ -36,11 +36,11 @@ app.use(express.static("public"))/* kabhi kabar koi files,image aayi to main use
 app.use(cookieParser()) // browser se jo bhi cookies aaye server use read kr ske and unpe CRUD operation perform kar sake.
 
 
+
+
+
 //routes import:
 import userRouter from "./routes/user.routes.js"
-
-
-
 
 //routes decleration:-
 

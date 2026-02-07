@@ -13,9 +13,9 @@ import fs from "fs" // filesystem liabrary of nodejs used while managing any fil
         api_secret: process.env.CLOUDINARY_API_SECRET 
     });
 
-     console.log("CLOUDINARY NAME:", process.env.CLOUDINARY_CLOUD_NAME);
-    console.log("CLOUDINARY KEY:", process.env.CLOUDINARY_API_KEY);
-    console.log("CLOUDINARY SECRET:", process.env.CLOUDINARY_API_SECRET);
+     //console.log("CLOUDINARY NAME:", process.env.CLOUDINARY_CLOUD_NAME);
+     //console.log("CLOUDINARY KEY:", process.env.CLOUDINARY_API_KEY);
+     //console.log("CLOUDINARY SECRET:", process.env.CLOUDINARY_API_SECRET);
 
 
 
@@ -29,13 +29,10 @@ import fs from "fs" // filesystem liabrary of nodejs used while managing any fil
              //file has been uploaded succesfully
              // console.log("file is uploaded on cloudinary",response.url); // this url is kept in our DB
               fs.unlinkSync(localFilePath) // removes local temp file
-              return response;
+              return response; 
 
               console.log(response);
               
-
-
-             
             } catch (error) {
               fs.unlinkSync(localFilePath) // remove the locally saved temporary file as the upload operation got failed
               return null;

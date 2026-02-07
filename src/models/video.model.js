@@ -2,6 +2,7 @@ import mongoose, {Schema} from 'mongoose'
 import { User } from './user.model'
 
 import mongooseAggregatePaginate from mongoose
+/* This plugin adds pagination support for MongoDB aggregation pipelines. */
 
 const videoSchema = new Schema(
     {

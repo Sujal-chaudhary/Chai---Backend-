@@ -51,6 +51,8 @@ const userSchema = new Schema (
 
 
 // using async bcz Password encryption is time taking process
+
+/* This is a Mongoose middleware (hook) that runs BEFORE a user document is saved in MongoDB. */
 userSchema.pre("save", async function () {
      if(!this.isModified("password")) return;
 
@@ -77,9 +79,13 @@ userSchema.pre("save", async function () {
    
    userSchema.methods.isPasswordCorrect = async function (password) {
       return await bcrypt.compare(password, this.password)
-   }
+   } 
 
-   // JWT tokens:
+   // JWT tokens:-
+
+  /* This method creates a short-lived token used for:
+
+    API authentication, Protected routes*/
 
    userSchema.methods.generateAccessToken = function(){
       return jwt.sign(
@@ -95,6 +101,9 @@ userSchema.pre("save", async function () {
          }
    )
    }
+
+   /* Refresh token:
+       Lives longer, Used to generate new access tokens, Contains minimal data */
    userSchema.methods.generateRefreshToken = function(){
        return jwt.sign(
          {
