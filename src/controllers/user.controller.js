@@ -405,7 +405,7 @@ const updateUsercoverImage = asyncHandler(async(req,res)=>{
 })
 
 
-// very very important Controller:~
+// very very important Controller:~ (Aggregation Pipelines)
 const getUserProfile = asyncHandler(async(req,res)=>{
 // jab bhi hum kisi bhi channel pe jate hai to uske url se hi to jate hai therefoer ehere req.params are used here.
 
@@ -486,6 +486,105 @@ const {username} = req.params
   
 })
 
+
+
+const getWatchHistory = asyncHandler(async(req,res)=>{
+  const user = await User.aggregate([
+    {
+      $match:{
+        _id:new mongoose.Types.ObjectId(req.user._id) //it gives us mongoDB id in pipeline
+      }
+    },
+    {
+      $lookup:{
+         from: "videos",
+         localField:"watchHistory",
+         foreignField: "_id",
+         as: "watchHistory",
+         //nested $lookup:(study about populate method too)
+         pipeline:[ //now i am inside videos
+             {
+              $lookup:{
+                from: "users",
+                localField:"owner",
+                foreignField:"_id",
+                as:"owner",
+                pipeline:[
+                  {
+                    $project:{
+                      fullName:1,
+                      username:1,
+                      avatar
+                    }
+                  }
+                ]
+              } //gives an array
+             },
+             {
+              $addField:{ // used to convert lookup array → single object
+                   owner:{
+                    $first: "$owner"
+                   }
+              }
+             }
+         ] //this pipline data is inside the owner field
+    }
+    }
+  ])
+
+  return res
+  .status(200)
+  .json(new ApiResponse(
+    200,
+    user[0].watchHistory,
+    "Watch history fetched succesfully"
+  ))
+})
+
+
+/*
+ => aggregate() ALWAYS returns: ARRAY of documents Even if only one user matches.
+
+    user is:
+
+[
+   { ...userDocument }
+]
+
+
+The aggregation returns:
+
+[
+  {
+    _id: "USER_ID",
+    username: "...",
+    otherUserFields: "...",
+
+    watchHistory: [
+      {
+        _id: "VIDEO_ID",
+        title: "...",
+        owner: {
+          fullName: "...",
+          username: "...",
+          avatar: "..."
+        }
+      },
+      {
+        _id: "VIDEO_ID",
+        title: "...",
+        owner: {
+          fullName: "...",
+          username: "...",
+          avatar: "..."
+        }
+      }
+    ]
+  }
+]
+
+
+*/ 
 
 
 
