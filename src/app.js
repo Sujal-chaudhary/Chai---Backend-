@@ -41,6 +41,7 @@ app.use(cookieParser()) // browser se jo bhi cookies aaye server use read kr ske
 
 //routes import:
 import userRouter from "./routes/user.routes.js"
+import videoRouter from "./routes/video.route.js"
 
 //routes decleration:-
 
@@ -49,6 +50,11 @@ import userRouter from "./routes/user.routes.js"
 app.use("/api/v1/users", userRouter) // when any user type "/users"the control will come in hand of userRouter then ye userRouter.js me jayenge aur puchega kya krna hai.
 
 // http://localhost:8000/api/v1/users/register
+
+app.use("/api/v1/videos",videoRouter) // ALL routes inside VideoRouter automatically belong to the videos resource.
+
+
+
 
 
  

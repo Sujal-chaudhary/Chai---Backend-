@@ -7,13 +7,14 @@ import mongooseAggregatePaginate from mongoose
 const videoSchema = new Schema(
     {
         videoFile: {
-            type:String,// cloudinary url
-            required: true,
+            url:String,// cloudinary url for frontend display
+            public_id:String,
+           
         },
         thumbnail: {
-            type:String,// cloudinary url
-            required: true,
-        },
+            url:String,// cloudinary url for frontend display
+            public_id:String,
+           },
         title: {
             type:String,
             required: true,
