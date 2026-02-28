@@ -33,3 +33,6 @@ router.route("/:videoId") // as every api call is through url
 )
 
 router.route("/toggle/publish/:videoId").patch(togglePublishStatus)
+
+
+export default router

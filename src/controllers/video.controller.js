@@ -34,7 +34,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
        let filter = {} // 👉 dynamically build filter , on the basis of this i will get my list 
 
        if(userId){
-        filter.owner = userId
+        filter.likedby = userId
        }
 
        if (query) {

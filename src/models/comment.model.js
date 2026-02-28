@@ -9,12 +9,12 @@ const commentSchema = new Schema({
         required: true
       },
       video:{
-        types:Schema.Types.ObjectId,
-        ref: Video
+        type:Schema.Types.ObjectId,
+        ref:" Video"
       },
       owner:{
-        types:Schema.Types.ObjectId,
-        ref: User
+        type:Schema.Types.ObjectId,
+        ref: "User"
       }
 
 },{timestamps:true})

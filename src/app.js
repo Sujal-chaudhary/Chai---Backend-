@@ -42,6 +42,9 @@ app.use(cookieParser()) // browser se jo bhi cookies aaye server use read kr ske
 //routes import:
 import userRouter from "./routes/user.routes.js"
 import videoRouter from "./routes/video.route.js"
+import tweetRouter from "./routes/tweet.routes.js"
+import likeRouter from "./routes/like.routes.js"
+
 
 //routes decleration:-
 
@@ -52,6 +55,9 @@ app.use("/api/v1/users", userRouter) // when any user type "/users"the control w
 // http://localhost:8000/api/v1/users/register
 
 app.use("/api/v1/videos",videoRouter) // ALL routes inside VideoRouter automatically belong to the videos resource.
+app.use("/api/v1/tweets",tweetRouter) 
+app.use("/api/v1/likes",likeRouter) 
+
 
 
 
