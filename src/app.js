@@ -44,6 +44,8 @@ import userRouter from "./routes/user.routes.js"
 import videoRouter from "./routes/video.route.js"
 import tweetRouter from "./routes/tweet.routes.js"
 import likeRouter from "./routes/like.routes.js"
+import CommentRouter from "./routes/comment.routes.js"
+import  PlaylistRouter from "./routes/playlist.routes.js"
 
 
 //routes decleration:-
@@ -57,6 +59,8 @@ app.use("/api/v1/users", userRouter) // when any user type "/users"the control w
 app.use("/api/v1/videos",videoRouter) // ALL routes inside VideoRouter automatically belong to the videos resource.
 app.use("/api/v1/tweets",tweetRouter) 
 app.use("/api/v1/likes",likeRouter) 
+app.use("/api/v1/comments",CommentRouter)
+app.use("/api/v1/playlists",PlaylistRouter)
 
 
 
